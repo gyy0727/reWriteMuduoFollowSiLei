@@ -2,7 +2,7 @@
  * @Author: Gyy0727 3155833132@qq.com
  * @Date: 2023-11-21 16:02:19
  * @LastEditors: Gyy0727 3155833132@qq.com
- * @LastEditTime: 2023-12-02 18:42:51
+ * @LastEditTime: 2023-12-02 19:00:38
  * @FilePath: /桌面/myModuo/include/Channel.h
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置
  * 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -82,12 +82,6 @@ public:
   int index() { return index_; }
   void set_index(int idx) { index_ = idx; }
 
-  // for debug
-  string reventsToString() const;
-  string eventsToString() const;
-
-  void doNotLogHup() { logHup_ = false; }
-
   EventLoop *ownerLoop() { return loop_; }
   /* 从EventLoop中移除当前通道.
    * 建议在移除前禁用所有事件
@@ -105,7 +99,6 @@ private:
   // PollPoller：映射到fd_的poll fds数组的索引
   // EPollPoller：对fd的操作类型：kNew、kAdded、kDeleted
   int index_;
-  bool logHup_;
   static const int kNoneEvent_;
   static const int kReadEvent_;
   static const int kWriteEvent_;

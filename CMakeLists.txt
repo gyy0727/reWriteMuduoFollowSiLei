@@ -14,4 +14,4 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 # add_library(threadPool SHARED ${SRC})
 #设置根据哪些文件生成可执行文件
-add_executable(myMuduo ${SRC})
+add_executable(myMuDuo ${SRC})

@@ -63,7 +63,7 @@ CMAKE_BINARY_DIR = /home/muqiu0614/桌面/myModuo/build
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/myMuduo.dir/all
+all: CMakeFiles/myMuDuo.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -71,34 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/myMuduo.dir/clean
+clean: CMakeFiles/myMuDuo.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/myMuduo.dir
+# Target rules for target CMakeFiles/myMuDuo.dir
 
 # All Build rule for target.
-CMakeFiles/myMuduo.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMuduo.dir/build.make CMakeFiles/myMuduo.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMuduo.dir/build.make CMakeFiles/myMuduo.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/muqiu0614/桌面/myModuo/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16 "Built target myMuduo"
-.PHONY : CMakeFiles/myMuduo.dir/all
+CMakeFiles/myMuDuo.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMuDuo.dir/build.make CMakeFiles/myMuDuo.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMuDuo.dir/build.make CMakeFiles/myMuDuo.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/muqiu0614/桌面/myModuo/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19 "Built target myMuDuo"
+.PHONY : CMakeFiles/myMuDuo.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/myMuduo.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/muqiu0614/桌面/myModuo/build/CMakeFiles 16
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/myMuduo.dir/all
+CMakeFiles/myMuDuo.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/muqiu0614/桌面/myModuo/build/CMakeFiles 19
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/myMuDuo.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/muqiu0614/桌面/myModuo/build/CMakeFiles 0
-.PHONY : CMakeFiles/myMuduo.dir/rule
+.PHONY : CMakeFiles/myMuDuo.dir/rule
 
 # Convenience name for target.
-myMuduo: CMakeFiles/myMuduo.dir/rule
-.PHONY : myMuduo
+myMuDuo: CMakeFiles/myMuDuo.dir/rule
+.PHONY : myMuDuo
 
 # clean rule for target.
-CMakeFiles/myMuduo.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMuduo.dir/build.make CMakeFiles/myMuduo.dir/clean
-.PHONY : CMakeFiles/myMuduo.dir/clean
+CMakeFiles/myMuDuo.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/myMuDuo.dir/build.make CMakeFiles/myMuDuo.dir/clean
+.PHONY : CMakeFiles/myMuDuo.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

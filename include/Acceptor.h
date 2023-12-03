@@ -14,6 +14,7 @@
  * TCP连接接受器
  * 基础调用为accept(2)/accept4(2)
  */
+#pragma once
 #include "Channel.h"
 #include "EventLoop.h"
 #include "InetAddress.h"
