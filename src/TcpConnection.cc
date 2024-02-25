@@ -2,7 +2,7 @@
  * @Author: Gyy0727 3155833132@qq.com
  * @Date: 2023-12-02 18:58:04
  * @LastEditors: Gyy0727 3155833132@qq.com
- * @LastEditTime: 2023-12-03 17:09:37
+ * @LastEditTime: 2023-12-03 20:05:11
  * @FilePath: /桌面/myModuo/src/TcpConnection.cc
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置
  * 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -15,6 +15,8 @@ static EventLoop *CheckLoopNotNull(EventLoop *loop) {
   }
   return loop;
 }
+
+// 由tcpserver管理,当acceptor接收到新链接
 TcpConnection::TcpConnection(EventLoop *loop, const std::string &name,
                              int sockfd, const InetAddress &localAddr,
                              const InetAddress &peerAddr)
@@ -22,6 +24,7 @@ TcpConnection::TcpConnection(EventLoop *loop, const std::string &name,
       socket_(new Socket(sockfd)), channel_(new Channel(loop, sockfd)),
       localAddr_(localAddr), peerAddr_(peerAddr),
       highWaterMark_(64 * 1024 * 1024) {
+  // 存入用户自定义的回调
   channel_->setReadCallback(
       std::bind(&TcpConnection::handleRead, this, std::placeholders::_1));
   channel_->setWriteCallback(std::bind(&TcpConnection::handleWrite, this));
@@ -29,6 +32,7 @@ TcpConnection::TcpConnection(EventLoop *loop, const std::string &name,
   channel_->setErrorCallback(std::bind(&TcpConnection::handleError, this));
 
   LOG_INFO("TcpConnection::ctor[%s] at fd=%d\n", name_.c_str(), sockfd);
+  // 打开tcp的保活机制
   socket_->setKeepAlive(true);
 }
 
@@ -39,17 +43,21 @@ TcpConnection::~TcpConnection() {
 
 // 发送数据
 void TcpConnection::send(const std::string &buf) {
+  //*判断是否已连接
   if (state_ == kConnected) {
+    //*是否在所属线程
     if (loop_->isInLoopThread()) {
+      //*若在,直接执行
       sendInLoop(buf.c_str(), buf.size());
     } else {
+      //*若不在,调用函数唤醒线程执行
       loop_->runInLoop(
           std::bind(&TcpConnection::sendInLoop, this, buf.c_str(), buf.size()));
     }
   }
 }
 
-// 关闭连接
+// 关闭写端
 void TcpConnection::shutdown() {
   if (state_ == kConnected) {
     setState(kDisconnecting);
@@ -75,68 +83,77 @@ void TcpConnection::connectDestroyed() {
   }
   channel_->remove(); // 把channel从poller中删除掉
 }
+/**
+ * 从输入缓存inputBuffer_读取数据, 交给回调messageCallback_处理
+ * @param receiveTime 接收到读事件的时间点
+ * @details 通常是TcpServer/TcpClient运行回调messageCallback_,
+ * 将处理机会传递给用户
+ */
+void TcpConnection::handleRead(TimeStamp receiveTime) {
+  int savedErrno = 0;
+  ssize_t n = inputBuffer_.readFd(channel_->sockfd(), &savedErrno);
+  if (n > 0) {
+    // 已建立连接的用户，有可读事件发生了，调用用户传入的回调操作onMessage
+    this->messageCallback_(shared_from_this(), &inputBuffer_, receiveTime);
+  } else if (n == 0) {
+    handleClose();
+  } else {
+    errno = savedErrno;
+    LOG_ERROR("TcpConnection::handleRead");
+    handleError();
+  }
+}
 
-void TcpConnection::handleRead(TimeStamp receiveTime) {}
 void TcpConnection::handleWrite() {
-  if (channel_->isWriting())
-    {
-        int savedErrno = 0;
-        ssize_t n = outputBuffer_.writeFd(channel_->sockfd(), &savedErrno);
-        if (n > 0)
-        {
-            outputBuffer_.retrieve(n);
-            if (outputBuffer_.readableBytes() == 0)
-            {
-                channel_->disableWriting();
-                if (writeCompleteCallback_)
-                {
-                    // 唤醒loop_对应的thread线程，执行回调
-                    loop_->queueInLoop(
-                        std::bind(writeCompleteCallback_, shared_from_this())
-                    );
-                }
-                if (state_ == kDisconnecting)
-                {
-                    shutdownInLoop();
-                }
-            }
+  if (channel_->isWriting()) {
+    int savedErrno = 0;
+    ssize_t n = outputBuffer_.writeFd(channel_->sockfd(), &savedErrno);
+    if (n > 0) {
+      outputBuffer_.retrieve(n);
+      if (outputBuffer_.readableBytes() == 0) {
+        channel_->disableWriting();
+        if (writeCompleteCallback_) {
+          // 唤醒loop_对应的thread线程，执行回调
+          loop_->queueInLoop(
+              std::bind(writeCompleteCallback_, shared_from_this()));
         }
-        else
-        {
-            LOG_ERROR("TcpConnection::handleWrite");
+        if (state_ == kDisconnecting) {
+          shutdownInLoop();
         }
+      }
+    } else {
+      LOG_ERROR("TcpConnection::handleWrite");
     }
-    else
-    {
-        LOG_ERROR("TcpConnection fd=%d is down, no more writing \n", channel_->sockfd());
-    }
+  } else {
+    LOG_ERROR("TcpConnection fd=%d is down, no more writing \n",
+              channel_->sockfd());
+  }
 }
 // poller => channel::closeCallback => TcpConnection::handleClose
-void TcpConnection::handleClose()
-{
-    LOG_INFO("TcpConnection::handleClose fd=%d state=%d \n", channel_->sockfd(), (int)state_);
-    setState(kDisconnected);
-    channel_->disableAll();
+void TcpConnection::handleClose() {
+  LOG_INFO("TcpConnection::handleClose fd=%d state=%d \n", channel_->sockfd(),
+           (int)state_);
+  setState(kDisconnected);
+  channel_->disableAll();
 
-    TcpConnectionPtr connPtr(shared_from_this());
-    connectionCallback_(connPtr); // 执行连接关闭的回调
-    closeCallback_(connPtr); // 关闭连接的回调  执行的是TcpServer::removeConnection回调方法
+  TcpConnectionPtr connPtr(shared_from_this());
+  connectionCallback_(connPtr); // 执行连接关闭的回调
+  closeCallback_(
+      connPtr); // 关闭连接的回调  执行的是TcpServer::removeConnection回调方法
 }
 
-void TcpConnection::handleError()
-{
-    int optval;
-    socklen_t optlen = sizeof optval;
-    int err = 0;
-    if (::getsockopt(channel_->sockfd(), SOL_SOCKET, SO_ERROR, &optval, &optlen) < 0)
-    {
-        err = errno;
-    }
-    else
-    {
-        err = optval;
-    }
-    LOG_ERROR("TcpConnection::handleError name:%s - SO_ERROR:%d \n", name_.c_str(), err);
+void TcpConnection::handleError() {
+  int optval;
+  socklen_t optlen = sizeof optval;
+  int err = 0;
+  if (::getsockopt(channel_->sockfd(), SOL_SOCKET, SO_ERROR, &optval, &optlen) <
+      0) {
+    err = errno;
+  } else {
+    err = optval;
+  }
+  LOG_ERROR("TcpConnection::handleError name:%s - SO_ERROR:%d \n",
+            name_.c_str(), err);
 }
 /**
  * 发送数据  应用写的快， 而内核发送数据慢， 需要把待发送数据写入缓冲区，
