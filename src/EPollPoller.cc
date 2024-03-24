@@ -2,7 +2,7 @@
  * @Author: Gyy0727 3155833132@qq.com
  * @Date: 2023-11-21 19:06:25
  * @LastEditors: Gyy0727 3155833132@qq.com
- * @LastEditTime: 2023-11-30 14:51:03
+ * @LastEditTime: 2024-03-22 15:40:27
  * @FilePath: /桌面/myModuo/src/EPollPoller.cc
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置
  * 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -29,7 +29,7 @@ EPollPoller::EPollPoller(EventLoop *loop)
     : Poller(loop), epollfd_(::epoll_create1(EPOLL_CLOEXEC)),
       events_(kInitEventListSize) {
   if (epollfd_ < 0) {
-    LOG_FATAL("创建epoll实例失败 error:%d\n", errno);
+    //!LOG_FATAL("创建epoll实例失败 error:%d\n", errno);
   }
 }
 EPollPoller::~EPollPoller() { ::close(epollfd_); }
@@ -43,17 +43,17 @@ TimeStamp EPollPoller::poll(int timeoutMs, ChannelList *activeChannels) {
   // 获取当前时间
   TimeStamp now(TimeStamp::now());
   if (numOfEvents > 0) {
-    LOG_INFO("%d 个事件发生了感兴趣事件 \n", numOfEvents);
+    //!LOG_INFO("%d 个事件发生了感兴趣事件 \n", numOfEvents);
     fillActiveChannels(numOfEvents, activeChannels);
-    if (numOfEvents == events_.size()) {
+    if (numOfEvents == static_cast<int>(events_.size())) {
       events_.resize(events_.size() * 2);
     }
   } else if (numOfEvents == 0) {
-    LOG_DEBUG("%s 监听epoll超过设定超时时间! \n", __FUNCTION__);
+    //!LOG_DEBUG("%s 监听epoll超过设定超时时间! \n", __FUNCTION__);
   } else {
     if (saveErrno != EINTR) {
       errno = saveErrno;
-      LOG_ERROR("EPollPoller::poll() 发生错误非系统中断!");
+      //!LOG_ERROR("EPollPoller::poll() 发生错误非系统中断!");
     }
   }
   return now;
@@ -62,8 +62,8 @@ TimeStamp EPollPoller::poll(int timeoutMs, ChannelList *activeChannels) {
 // 更新epoll监听的事件集合 /* ADD/MOD/DEL */
 void EPollPoller::updateChannel(Channel *channel) {
   const int index = channel->index();
-  LOG_INFO("func=%s => fd=%d events=%d index=%d \n", __FUNCTION__,
-           channel->sockfd(), channel->events(), index);
+  //!LOG_INFO("func=%s => fd=%d events=%d index=%d \n", __FUNCTION__,
+        //!   channel->sockfd(), channel->events(), index);
 
   if (index == kNew || index == kDeleted) {
     if (index == kNew) {
@@ -75,7 +75,7 @@ void EPollPoller::updateChannel(Channel *channel) {
     update(EPOLL_CTL_ADD, channel);
   } else // channel已经在poller上注册过了
   {
-    int fd = channel->sockfd();
+    // int fd = channel->sockfd();
     if (channel->isNoneEvent()) {
       update(EPOLL_CTL_DEL, channel);
       channel->set_index(kDeleted);
@@ -88,7 +88,7 @@ void EPollPoller::updateChannel(Channel *channel) {
 void EPollPoller::removeChannel(Channel *channel) {
   int fd = channel->sockfd();
   channels_.erase(fd);
-  LOG_INFO("事件%d已被删除\n", fd);
+  //!LOG_INFO("事件%d已被删除\n", fd);
   int index = channel->index();
   if (index == kAdded) {
     update(EPOLL_CTL_DEL, channel);
@@ -114,8 +114,8 @@ void EPollPoller::update(int operation, Channel *channel) {
   event.data.fd = fd;
   event.data.ptr = channel;
   if (::epoll_ctl(epollfd_, operation, fd, &event) < 0) {
-    LOG_ERROR("更新操作epoll_ctl失败errno=%d\n", errno);
+    //! LOG_ERROR("更新操作epoll_ctl失败errno=%d\n", errno);
   } else {
-    LOG_INFO("更新操作epoll_ctl成功");
+    //! LOG_INFO("更新操作epoll_ctl成功");
   }
 }

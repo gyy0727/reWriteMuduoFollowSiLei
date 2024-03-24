@@ -124,5 +124,5 @@ set(CMAKE_MAKEFILE_PRODUCTS
 
 # Dependency information for all targets:
 set(CMAKE_DEPEND_INFO_FILES
-  "CMakeFiles/myMuDuo.dir/DependInfo.cmake"
+  "CMakeFiles/Sylar.dir/DependInfo.cmake"
   )

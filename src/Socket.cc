@@ -2,7 +2,7 @@
  * @Author: Gyy0727 3155833132@qq.com
  * @Date: 2023-11-22 15:06:35
  * @LastEditors: Gyy0727 3155833132@qq.com
- * @LastEditTime: 2023-12-02 16:56:07
+ * @LastEditTime: 2024-03-22 15:25:39
  * @FilePath: /桌面/smallchat/src/socket.cc
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置
  * 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -23,12 +23,12 @@ Socket::~Socket() { ::close(socketfd_); }
 void Socket::bindAddress(const InetAddress &localaddr) {
   if (0 != ::bind(socketfd_, (sockaddr *)localaddr.getSockAddr(),
                   sizeof(sockaddr_in))) {
-    LOG_FATAL("bind socketfd:%d 失败 \n", socketfd_);
+   //! LOG_FATAL("bind socketfd:%d 失败 \n", socketfd_);
   }
 }
 void Socket::listen() {
   if (0 != ::listen(socketfd_, 1024)) {
-    LOG_FATAL("listen sockfd:%d 失败 \n", socketfd_);
+    //!LOG_FATAL("listen sockfd:%d 失败 \n", socketfd_);
   }
 }
 int Socket::accept(InetAddress *peeraddr) {
@@ -51,7 +51,7 @@ int Socket::accept(InetAddress *peeraddr) {
 /*  关闭写入。*/
 void Socket::shutdownWrite() {
   if (::shutdown(socketfd_, SHUT_WR) < 0) {
-    LOG_ERROR("关闭写入端 error");
+    //!LOG_ERROR("关闭写入端 error");
   }
 }
 /*    作用：启用或禁用Nagle算法。Nagle算法是一种用于减少小数据报文传输的算法，启用该选项后可以减小网络传输的延迟，但可能增加网络带宽的使用。

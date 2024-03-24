@@ -2,19 +2,20 @@
  * @Author: Gyy0727 3155833132@qq.com
  * @Date: 2023-11-26 17:37:55
  * @LastEditors: Gyy0727 3155833132@qq.com
- * @LastEditTime: 2023-12-02 17:14:01
+ * @LastEditTime: 2024-03-24 15:30:08
  * @FilePath: /桌面/myModuo/src/Acceptor.cc
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置
  * 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
 #include "../include/Acceptor.h"
+#include "Logger.h"
+#include <cerrno>
 #include <utility>
 // 创建一个非阻塞文件描述符
 static int createNonblocking() {
   int sockfd = ::socket(AF_INET, SOCK_STREAM | SOCK_NONBLOCK | SOCK_CLOEXEC, 0);
   if (sockfd < 0) {
-    LOG_FATAL("%s:%s:%d listen socket create err:%d \n", __FILE__, __FUNCTION__,
-              __LINE__, errno);
+      LOG_FATAL(logger) << "listen socket create err:" << errno;
   }
   return sockfd;
 }
@@ -64,10 +65,12 @@ void Acceptor::handleRead() {
     }
     else
     {
-        LOG_ERROR("%s:%s:%d accept err:%d \n", __FILE__, __FUNCTION__, __LINE__, errno);
+         LOG_ERROR(logger) <<"accept err:" << errno;
         if (errno == EMFILE)
         {
-            LOG_ERROR("%s:%s:%d sockfd reached limit! \n", __FILE__, __FUNCTION__, __LINE__);
+          //! LOG_ERROR("%s:%s:%d sockfd reached limit! \n", __FILE__,
+          //! __FUNCTION__, __LINE__);
+           LOG_ERROR(logger) <<" sockfd reached limit";
         }
     }
 }

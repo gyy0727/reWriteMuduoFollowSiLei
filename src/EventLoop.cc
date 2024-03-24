@@ -2,7 +2,7 @@
  * @Author: Gyy0727 3155833132@qq.com
  * @Date: 2023-11-21 17:07:25
  * @LastEditors: Gyy0727 3155833132@qq.com
- * @LastEditTime: 2023-12-01 08:34:35
+ * @LastEditTime: 2024-03-22 15:46:19
  * @FilePath: /桌面/myModuo/src/EventLoop.cc
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置
  * 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -19,20 +19,19 @@ const int kPollTimeMs = 10000;
 int createEventFd() {
   int evefd = ::eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
   if (evefd < 0) {
-    LOG_FATAL("创建eventfd错误%d\n", errno);
+    //!LOG_FATAL("创建eventfd错误%d\n", errno);
   }
   return evefd;
 }
 
 EventLoop::EventLoop()
-    : looping_(false), quit_(false), threadId_(CurrentThread::tid()),
-      callingPendingFunctors_(false), poller_(Poller::newDefaultPoller(this)),
-      wakeupFd_(createEventFd()), wakeupChannel_(new Channel(this, wakeupFd_)) {
+    : looping_(false), quit_(false), threadId_(CurrentThread::tid()), poller_(Poller::newDefaultPoller(this)),
+      wakeupFd_(createEventFd()), wakeupChannel_(new Channel(this, wakeupFd_)),callingPendingFunctors_(false) {
 
-  LOG_DEBUG("事件循环: %p 创建 在线程: %d 中\n", this, threadId_);
+ //! LOG_DEBUG("事件循环: %p 创建 在线程: %d 中\n", this, threadId_);
   if (t_loopInThisThread) {
-    LOG_FATAL("其他事件循环: %p 已经创建在线程: %d \n", t_loopInThisThread,
-              threadId_);
+   //! LOG_FATAL("其他事件循环: %p 已经创建在线程: %d \n", t_loopInThisThread,
+           //!   threadId_);
   } else {
     t_loopInThisThread = this;
   }
@@ -51,7 +50,7 @@ EventLoop::~EventLoop() {
 void EventLoop::loop() {
   looping_ = true;
   quit_ = false;
-  LOG_INFO("事件循环: %p 开启 \n", this);
+ //! LOG_INFO("事件循环: %p 开启 \n", this);
   while (!quit_) {
     // 清空
     activeChannels_.clear();
@@ -70,7 +69,7 @@ void EventLoop::loop() {
     doPendingFunctors();
   }
 
-  LOG_INFO("事件循环 %p 已停止. \n", this);
+ //! LOG_INFO("事件循环 %p 已停止. \n", this);
   looping_ = false;
 }
 // 退出事件循环  1.loop在自己的线程中调用quit  2.在非loop的线程中，调用loop的quit
@@ -98,7 +97,7 @@ void EventLoop::wakeup() {
   uint64_t one = 1;
   ssize_t n = write(wakeupFd_, &one, sizeof one);
   if (n != sizeof one) {
-    LOG_ERROR("EventLoop::wakeup() 写入 %lu 字节而不是 8\n", n);
+   //! LOG_ERROR("EventLoop::wakeup() 写入 %lu 字节而不是 8\n", n);
   }
 }
 
@@ -160,6 +159,6 @@ void EventLoop::handleRead() {
   uint64_t one = 1;
   ssize_t n = read(wakeupFd_, &one, sizeof one);
   if (n != sizeof one) {
-    LOG_ERROR("EventLoop::handleRead() reads %lu bytes instead of 8", n);
+   //! LOG_ERROR("EventLoop::handleRead() reads %lu bytes instead of 8", n);
   }
 }

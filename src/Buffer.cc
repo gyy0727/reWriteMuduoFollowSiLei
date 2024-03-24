@@ -1,3 +1,12 @@
+/*
+ * @Author: Gyy0727 3155833132@qq.com
+ * @Date: 2023-12-02 18:56:07
+ * @LastEditors: Gyy0727 3155833132@qq.com
+ * @LastEditTime: 2024-03-22 15:31:36
+ * @FilePath: /sylar/home/muqiu0614/桌面/myModuo/src/Buffer.cc
+ * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置
+ * 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
+ */
 #include "../include/Buffer.h"
 #include <errno.h>
 #include <sys/uio.h>
@@ -12,8 +21,9 @@ ssize_t Buffer::readFd(int fd, int *saveErrno) {
   char extrabuf[65536] = {0}; // 栈上的内存空间  64K
   struct iovec vec[2];
 
-  const size_t writable =writableBytes(); // 这是Buffer底层缓冲区剩余的可写空间大小
-  vec[0].iov_base = begin() + writerIndex_;//可写数据首地址
+  const size_t writable =
+      writableBytes(); // 这是Buffer底层缓冲区剩余的可写空间大小
+  vec[0].iov_base = begin() + writerIndex_; //可写数据首地址
   vec[0].iov_len = writable;
 
   vec[1].iov_base = extrabuf;
@@ -24,7 +34,7 @@ ssize_t Buffer::readFd(int fd, int *saveErrno) {
   if (n < 0) {
     // ::readv系统调用错误
     *saveErrno = errno;
-  } else if (n <= writable) // Buffer的可写缓冲区已经够存储读出来的数据了
+  } else if (static_cast<size_t>(n) <= writable) // Buffer的可写缓冲区已经够存储读出来的数据了
   {
     writerIndex_ += n;
   } else // extrabuf里面也写入了数据

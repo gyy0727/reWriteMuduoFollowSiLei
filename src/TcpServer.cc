@@ -2,7 +2,7 @@
  * @Author: Gyy0727 3155833132@qq.com
  * @Date: 2023-11-21 18:38:01
  * @LastEditors: Gyy0727 3155833132@qq.com
- * @LastEditTime: 2023-12-03 17:21:51
+ * @LastEditTime: 2024-03-22 15:56:54
  * @FilePath: /桌面/myModuo/src/TcpServer.cc
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置
  * 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -11,8 +11,8 @@
 
 static EventLoop *CheckLoopNotNull(EventLoop *loop) {
   if (loop == nullptr) {
-    LOG_FATAL("%s:%s:%d mainLoop is null! \n", __FILE__, __FUNCTION__,
-              __LINE__);
+   //! LOG_FATAL("%s:%s:%d mainLoop is null! \n", __FILE__, __FUNCTION__,
+             //! __LINE__);
   }
   return loop;
 }
@@ -21,8 +21,8 @@ TcpServer::TcpServer(EventLoop *loop, const InetAddress &listenAddr,
     : loop_(CheckLoopNotNull(loop)), ipPort_(listenAddr.toIPPORT()),
       name_(nameArg),
       acceptor_(new Acceptor(loop, listenAddr, (option == kReusePort))),
-      threadPool_(new EventLoopThreadPool(loop, nameArg)), nextConnId_(1),
-      started_(0) { // 当有先用户连接时，会执行TcpServer::newConnection回调
+      threadPool_(new EventLoopThreadPool(loop, nameArg)),
+      started_(0) , nextConnId_(1){ // 当有先用户连接时，会执行TcpServer::newConnection回调
   acceptor_->setNewConnectionCallback(std::bind(&TcpServer::newConnection, this,
                                                 std::placeholders::_1,
                                                 std::placeholders::_2));
@@ -60,15 +60,15 @@ void TcpServer::newConnection(int sockfd, const InetAddress &peerAddr) {
   ++nextConnId_;
   std::string connName = name_ + buf;
 
-  LOG_INFO("TcpServer::newConnection [%s] - new connection [%s] from %s \n",
-           name_.c_str(), connName.c_str(), peerAddr.toIPPORT().c_str());
+  //!LOG_INFO("TcpServer::newConnection [%s] - new connection [%s] from %s \n",
+         //!  name_.c_str(), connName.c_str(), peerAddr.toIPPORT().c_str());
 
   // 通过sockfd获取其绑定的本机的ip地址和端口信息
   sockaddr_in local;
   ::bzero(&local, sizeof local);
   socklen_t addrlen = sizeof local;
   if (::getsockname(sockfd, (sockaddr *)&local, &addrlen) < 0) {
-    LOG_ERROR("sockets::getLocalAddr");
+   //! LOG_ERROR("sockets::getLocalAddr");
   }
   InetAddress localAddr(local);
 
@@ -96,8 +96,8 @@ void TcpServer::removeConnection(const TcpConnectionPtr &conn) {
 }
 
 void TcpServer::removeConnectionInLoop(const TcpConnectionPtr &conn) {
-  LOG_INFO("TcpServer::removeConnectionInLoop [%s] - connection %s\n",
-           name_.c_str(), conn->name().c_str());
+ //! LOG_INFO("TcpServer::removeConnectionInLoop [%s] - connection %s\n",
+         //!  name_.c_str(), conn->name().c_str());
 
   connections_.erase(conn->name());
   EventLoop *ioLoop = conn->getLoop();

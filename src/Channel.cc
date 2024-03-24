@@ -2,7 +2,7 @@
  * @Author: Gyy0727 3155833132@qq.com
  * @Date: 2023-11-21 16:04:55
  * @LastEditors: Gyy0727 3155833132@qq.com
- * @LastEditTime: 2023-12-02 18:40:07
+ * @LastEditTime: 2024-03-22 15:33:47
  * @FilePath: /桌面/myModuo/src/Channel.cc
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置
  * 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
@@ -14,7 +14,7 @@ const int Channel::kNoneEvent_ = 0;
 const int Channel::kReadEvent_ = EPOLLIN | EPOLLPRI;
 const int Channel::kWriteEvent_ = EPOLLOUT;
 Channel::Channel(EventLoop *loop, int fd)
-    : loop_(loop), fd_(fd), events_(0), revents_(0), index_(-1), tied_(false) {}
+    : index_(-1),loop_(loop), fd_(fd), events_(0), revents_(0),  tied_(false) {}
 Channel::~Channel() {}
 /* 处理事件, 监听事件激活时, 由EventLoop::loop调用 */
 /**
@@ -56,7 +56,7 @@ void Channel::remove() { loop_->removeChannel(this); }
 
 void Channel::update() { loop_->updateChannel(this); }
 void Channel::handleEventWithGuard(TimeStamp receiveTime) {
-   LOG_INFO("channel handleEvent revents:%d\n", revents_);
+  //! LOG_INFO("channel handleEvent revents:%d\n", revents_);
 
     if ((revents_ & EPOLLHUP) && !(revents_ & EPOLLIN))
     {

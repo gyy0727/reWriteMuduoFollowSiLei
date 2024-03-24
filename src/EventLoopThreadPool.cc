@@ -1,4 +1,5 @@
 #include "../include/EventLoopThreadPool.h"
+#include <cstddef>
 
 EventLoopThreadPool::EventLoopThreadPool(EventLoop *baseLoop,
                                          const std::string &nameArg)
@@ -50,7 +51,7 @@ EventLoop *EventLoopThreadPool::getNextLoop() {
     // round-robin
     loop = loops_[next_];
     ++next_;
-    if (next_ >= loops_.size()) {
+    if ((size_t)next_ >= loops_.size()) {
       next_ = 0;
     }
   }
@@ -58,12 +59,9 @@ EventLoop *EventLoopThreadPool::getNextLoop() {
 }
 
 std::vector<EventLoop *> EventLoopThreadPool::getAllLoops() {
-  if (loops_.empty())
-    {
-        return std::vector<EventLoop*>(1, baseLoop_);
-    }
-    else
-    {
-        return loops_;
-    }
+  if (loops_.empty()) {
+    return std::vector<EventLoop *>(1, baseLoop_);
+  } else {
+    return loops_;
+  }
 }
